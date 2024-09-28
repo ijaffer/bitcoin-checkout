@@ -1,94 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Bitcoin Payment</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #qrCodeSection, #confirmationMessage {
-            display: none;
-        }
-    </style>
-</head>
-<body>
+<script src="https://cdn.jsdelivr.net/npm/qrcode"></script>
+<script>
+    // Replace with your actual Bitcoin receiving address
+    const btcAddress = 'your-bitcoin-address';
 
-    <h1>Checkout</h1>
-    <form id="checkoutForm">
-        <label for="address">Shipping Address:</label><br>
-        <input type="text" id="address" name="address" required><br><br>
+    const checkoutForm = document.getElementById('checkoutForm');
+    const qrCodeSection = document.getElementById('qrCodeSection');
+    const qrCodeImg = document.getElementById('qrCode');
+    const btcAddressText = document.getElementById('btcAddress');
 
-        <label for="btcAmount">Total Bitcoin Amount to Pay (BTC):</label><br>
-        <input type="text" id="btcAmount" value="0.002" readonly><br><br>
+    checkoutForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-        <button type="submit">Make Payment</button>
-    </form>
+        const btcAmount = document.getElementById('btcAmount').value;
+        const shippingAddress = document.getElementById('address').value;
+        const paymentUri = `bitcoin:${btcAddress}?amount=${btcAmount}`;
 
-    <div id="qrCodeSection">
-        <h2>Scan this QR to Pay</h2>
-        <img id="qrCode" alt="Bitcoin Payment QR Code"><br>
-        <p id="btcAddress"></p>
-    </div>
-
-    <div id="confirmationMessage">
-        <h2>Order Confirmed!</h2>
-        <p>Thank you for your payment. Your order has been confirmed.</p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/qrcode"></script>
-    <script>
-        // Replace with your actual Bitcoin receiving address
-        const btcAddress = 'bc1pf3qj4s2x4w80c8sc905p6f87hlejty3gu0uam8skh34lkwpdwadqqdptee';
-
-        const checkoutForm = document.getElementById('checkoutForm');
-        const qrCodeSection = document.getElementById('qrCodeSection');
-        const qrCodeImg = document.getElementById('qrCode');
-        const btcAddressText = document.getElementById('btcAddress');
-
-        checkoutForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const btcAmount = document.getElementById('btcAmount').value;
-            const shippingAddress = document.getElementById('address').value;
-            const paymentUri = `bitcoin:${btcAddress}?amount=${btcAmount}`;
-
-            // Generate QR code for the payment request
-            QRCode.toDataURL(paymentUri, function(err, url) {
-                qrCodeImg.src = url;
-            });
-
-            btcAddressText.textContent = `Bitcoin Address: ${btcAddress}`;
-            qrCodeSection.style.display = 'block';
-
-            // Verify the transaction
-            verifyTransaction(btcAddress, btcAmount);
+        // Generate QR code for the payment request
+        QRCode.toDataURL(paymentUri, function(err, url) {
+            qrCodeImg.src = url;
         });
 
-        function verifyTransaction(address, amount) {
-            // Here you can integrate a Blockchain API to verify the transaction
-            const apiUrl = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`;
+        btcAddressText.textContent = `Bitcoin Address: ${btcAddress}`;
+        qrCodeSection.style.display = 'block';
 
-            setTimeout(() => {
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Check if the final balance is greater than or equal to the amount due
-                        if (data.final_balance >= amount * 100000000) { // Convert BTC to Satoshis
-                            // Payment received, confirm the order
-                            qrCodeSection.style.display = 'none';
-                            document.getElementById('confirmationMessage').style.display = 'block';
-                        } else {
-                            console.log('Payment not yet received.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }, 5000); // Simulating 5-second delay before checking payment
-        }
-    </script>
-
-</body>
-</html>
+        // You can add payment verification logic here or after a time delay
+    });
+</script>
